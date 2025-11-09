@@ -11,9 +11,9 @@ namespace Shared.Database.Repositories
     {
 
         public readonly ApplicationDbContext _context;
-        public readonly ILogger _logger;
+        public readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(ApplicationDbContext context, ILogger logger)
+        public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
         {
             _context = context;
             _logger = logger;

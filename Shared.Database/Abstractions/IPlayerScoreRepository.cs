@@ -10,6 +10,7 @@ namespace Shared.Database.Abstractions
         Task<List<PlayerScore>> GetAllScores();
         Task<PlayerScore?> GetScoreByUserId(Guid id);
         Task<Guid> Update(Guid id, string username, uint score);
-        Task<Guid> UpdateScoreOnly(Guid id, uint score);
+        Task<Guid> SetScore(Guid id, uint score);
+        Task<Guid> AddScore(Guid id, uint score);
     }
 }

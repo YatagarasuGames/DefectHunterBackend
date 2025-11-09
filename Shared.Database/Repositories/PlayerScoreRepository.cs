@@ -9,9 +9,9 @@ namespace Shared.Database.Repositories
     public class PlayerScoreRepository : IPlayerScoreRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<PlayerScoreRepository> _logger;
 
-        public PlayerScoreRepository(ApplicationDbContext context, ILogger logger)
+        public PlayerScoreRepository(ApplicationDbContext context, ILogger<PlayerScoreRepository> logger)
         {
             _context = context;
             _logger = logger;
@@ -64,7 +64,7 @@ namespace Shared.Database.Repositories
 
         }
 
-        public async Task<Guid> UpdateScoreOnly(Guid id, uint score)
+        public async Task<Guid> SetScore(Guid id, uint score)
         {
 
             try
@@ -77,12 +77,33 @@ namespace Shared.Database.Repositories
 
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating player score for player with id {id}");
+                _logger.LogError(ex, $"Error setting player score for player with id {id}");
                 throw;
             }
 
 
         }
+
+        public async Task<Guid> AddScore(Guid id, uint score)
+        {
+
+            try
+            {
+                await _context.PlayerScores.Where(s => s.UserId == id).ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.Score, p => p.Score + score));
+                await _context.SaveChangesAsync();
+                return id;
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error adding player score for player with id {id}");
+                throw;
+            }
+
+
+        }
+
 
         public async Task<List<PlayerScore>> GetAllScores()
         {
