@@ -29,11 +29,11 @@ namespace Leaderboard.API.Controllers
             return await _leaderboardService.UpdateOnlyPlayerScore(request.UserId, request.ScoreToAdd);
         }
 
-        [HttpPost("create")]
-        public async Task<ActionResult<Guid>> CreateUserScore([FromBody] ScoreCreateRequest request)
-        {
-            return await _leaderboardService.CreatePlayerScore(PlayerScore.Create(request.UserId, request.Username, request.Score).PlayerScore);
-        }
+        //[HttpPost("create")]
+        //public async Task<ActionResult<Guid>> CreateUserScore([FromBody] ScoreCreateRequest request)
+        //{
+        //    return await _leaderboardService.CreatePlayerScore(PlayerScore.Create(request.UserId, request.Username, request.Score).PlayerScore);
+        //}
 
     }
 }

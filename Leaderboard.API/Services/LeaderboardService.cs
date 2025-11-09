@@ -35,7 +35,7 @@ namespace Leaderboard.API.Services
 
         public async Task<Guid> UpdateOnlyPlayerScore(Guid id, uint score)
         {
-            return await _playerScoreRepository.UpdateScoreOnly(id, score);
+            return await _playerScoreRepository.SetScore(id, score);
         }
 
         public async Task<Guid> Delete(Guid id)
