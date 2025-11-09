@@ -7,9 +7,9 @@ namespace Auth.API.Services.Queries.GetUserById
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User?>
     {
         private readonly IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<GetUserByIdQueryHandler> _logger;
 
-        public GetUserByIdQueryHandler(IUsersRepository usersRepository, ILogger logger)
+        public GetUserByIdQueryHandler(IUsersRepository usersRepository, ILogger<GetUserByIdQueryHandler> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

@@ -1,4 +1,5 @@
 using Auth.API.Abstractions;
+using Auth.API.Controllers;
 using Auth.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -8,15 +9,15 @@ using Shared.Database.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Log.Logger = new LoggerConfiguration()
-//    .ReadFrom.Configuration(builder.Configuration)
-//    .Enrich.FromLogContext()
-//    .WriteTo.Console()
-//    .WriteTo.File("logs/auth-api-.txt",
-//        rollingInterval: RollingInterval.Day,
-//        retainedFileCountLimit: 7,
-//        shared: true)
-//    .CreateLogger();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/auth-api-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        shared: true)
+    .CreateLogger();
 
 // Add services to the container.
 
@@ -53,7 +54,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-
+//builder.Host.UseSerilog();
 
 var app = builder.Build();
 

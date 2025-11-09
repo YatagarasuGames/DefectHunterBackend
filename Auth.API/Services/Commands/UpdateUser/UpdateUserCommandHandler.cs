@@ -6,8 +6,8 @@ namespace Auth.API.Services.Commands.UpdateUser
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Guid>
     {
         private readonly IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
-        public UpdateUserCommandHandler(IUsersRepository usersRepository, ILogger logger)
+        private readonly ILogger<UpdateUserCommandHandler> _logger;
+        public UpdateUserCommandHandler(IUsersRepository usersRepository, ILogger<UpdateUserCommandHandler> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

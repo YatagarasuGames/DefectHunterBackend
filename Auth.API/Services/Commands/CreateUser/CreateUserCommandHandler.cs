@@ -7,8 +7,8 @@ namespace Auth.API.Services.Commands.CreateUser
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
     {
         private IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
-        public CreateUserCommandHandler(IUsersRepository usersRepository, ILogger logger)
+        private readonly ILogger<CreateUserCommandHandler> _logger;
+        public CreateUserCommandHandler(IUsersRepository usersRepository, ILogger<CreateUserCommandHandler> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

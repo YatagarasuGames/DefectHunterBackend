@@ -6,9 +6,9 @@ namespace Auth.API.Services.Commands.DeleteUser
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Guid>
     {
         private readonly IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<DeleteUserCommandHandler> _logger;
 
-        public DeleteUserCommandHandler(IUsersRepository usersRepository, ILogger logger)
+        public DeleteUserCommandHandler(IUsersRepository usersRepository, ILogger<DeleteUserCommandHandler> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

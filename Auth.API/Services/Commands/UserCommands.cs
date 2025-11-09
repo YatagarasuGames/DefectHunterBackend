@@ -7,9 +7,9 @@ namespace Auth.API.Services.Commands
     public class UserCommands : IUserCommands
     {
         private IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserCommands> _logger;
 
-        public UserCommands(IUsersRepository usersRepository, ILogger logger)
+        public UserCommands(IUsersRepository usersRepository, ILogger<UserCommands> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

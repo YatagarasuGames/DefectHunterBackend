@@ -1,6 +1,6 @@
 ﻿using Shared.Models;
 
-namespace Auth.API.Services.Queries
+namespace Auth.API.Abstractions
 {
     public interface IUserQueries
     {

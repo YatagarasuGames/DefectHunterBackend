@@ -1,14 +1,9 @@
 ﻿using Auth.API.Abstractions;
 using Auth.API.Contracts;
 using Auth.API.Services.Commands.CreateUser;
-using Auth.API.Services.Queries;
 using Auth.API.Services.Queries.GetUserByEmail;
-using Leaderboard.API.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Database.Abstractions;
-using Shared.Models;
-using System.Net.Http;
 
 namespace Auth.API.Controllers
 {
@@ -19,9 +14,9 @@ namespace Auth.API.Controllers
 
         private IPasswordService _passwordService;
         private IMediator _mediator;
-        private ILogger _logger;
+        private ILogger<AuthController> _logger;
 
-        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger logger)
+        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger<AuthController> logger)
         {
             _passwordService = passwordService;
             _mediator = mediator;
@@ -58,7 +53,6 @@ namespace Auth.API.Controllers
         {
             try
             {
-                // Используем запрос для получения пользователя
                 var existingUser = await _mediator.Send(new GetUserByEmailQuery(request.Email));
 
                 if (_passwordService.VerifyPassword(request.Password, existingUser.Password))

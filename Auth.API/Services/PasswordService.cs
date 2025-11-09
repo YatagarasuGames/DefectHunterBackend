@@ -1,5 +1,5 @@
 ﻿using Auth.API.Abstractions;
-
+using MediatR;
 namespace Auth.API.Services
 {
     public class PasswordService : IPasswordService

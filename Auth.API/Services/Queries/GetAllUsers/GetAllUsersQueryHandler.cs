@@ -7,7 +7,7 @@ namespace Auth.API.Services.Queries.GetAllUsers
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
     {
         private readonly IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<GetAllUsersQueryHandler> _logger;
 
         public GetAllUsersQueryHandler(IUsersRepository usersRepository, ILogger<GetAllUsersQueryHandler> logger)
         {

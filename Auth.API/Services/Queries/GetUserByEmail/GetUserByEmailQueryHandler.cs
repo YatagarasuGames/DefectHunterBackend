@@ -7,9 +7,9 @@ namespace Auth.API.Services.Queries.GetUserByEmail
     public class GetUserByEmailQueryHandler : IRequestHandler<GetUserByEmailQuery, User?>
     {
         private readonly IUsersRepository _usersRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<GetUserByEmailQueryHandler> _logger;
 
-        public GetUserByEmailQueryHandler(IUsersRepository usersRepository, ILogger logger)
+        public GetUserByEmailQueryHandler(IUsersRepository usersRepository, ILogger<GetUserByEmailQueryHandler> logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;

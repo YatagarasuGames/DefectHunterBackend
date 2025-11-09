@@ -1,6 +1,15 @@
 ﻿using Auth.API.Abstractions;
 using Auth.API.Contracts;
+using Auth.API.Services;
+using Auth.API.Services.Commands.CreateUser;
+using Auth.API.Services.Commands.DeleteUser;
+using Auth.API.Services.Commands.UpdateUser;
+using Auth.API.Services.Queries.GetAllUsers;
+using Auth.API.Services.Queries.GetUserById;
+using Azure.Core;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Models;
 
 namespace Auth.API.Controllers
 {
@@ -8,64 +17,114 @@ namespace Auth.API.Controllers
     [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private IUsersService _usersService;
+        private readonly IMediator _mediator;
+        private readonly ILogger<UsersController> _logger;
+        private readonly IPasswordService _passwordService;
 
-        public UsersController(IUsersService usersService)
+        public UsersController(IMediator mediator, ILogger<UsersController> logger, IPasswordService passwordService)
         {
-            _usersService = usersService;
+            _logger = logger;
+            _mediator = mediator;
+            _passwordService = passwordService;
         }
 
         [HttpGet]
         [Route("get")]
         public async Task<ActionResult<List<UserAuthResponse>>> GetUsers()
         {
-            var users = await _usersService.GetAllUsers();
-            var response = users.Select(u => new UserAuthResponse(u.Id, u.Username, u.Email)).ToList();
-            
-            return Ok(response);
+            try
+            {
+                var users = await _mediator.Send(new GetAllUsersQuery());
+                var response = users.Select(u => new UserAuthResponse(u.Id, u.Username, u.Email)).ToList();
+                _logger.LogInformation("Get all users");
+                return Ok(response);
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error on getting all users: {ex.Message}");
+                return BadRequest(ex.Message);  
+            }
+
         }
 
         [HttpGet("get/{userId}")]
         public async Task<ActionResult<UserAuthResponse>> GetUserByIdAsync([FromRoute] Guid userId)
         {
-            var user = await _usersService.GetUserByIdAsync(userId);
-            if (user == null) return BadRequest("User with given Id not found!");
+            try
+            {
+                var user = await _mediator.Send(new GetUserByIdQuery(userId));
+                if (user == null) return BadRequest("User with given Id not found!");
 
-            return Ok(new UserAuthResponse(user.Id, user.Username, user.Email));
+                return Ok(new UserAuthResponse(user.Id, user.Username, user.Email));
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error on getting user with id {userId}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         [Route("create")]
         public async Task<ActionResult<Guid>> CreateUser([FromBody] UserAuthRequest request)
         {
-            var (user, error) = Shared.Models.User.Create(
-                Guid.NewGuid(),
-                request.Username,
-                request.Email,
-                request.Password
-                );
-
-            if (!string.IsNullOrEmpty(error))
+            try
             {
-                return BadRequest(error);
+                var userId = await _mediator.Send(new CreateUserCommand(
+                    Guid.NewGuid(),
+                    request.Username,
+                    request.Email,
+                    _passwordService.HashPassword(request.Password)
+                    ));
+
+                _logger.LogInformation("User created: {UserId}", userId);
+                return Ok(userId);
             }
 
-            var userId = await _usersService.CreateUser(user);
-            return Ok(userId);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to create user with email {request.Email}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> UpdateUser(Guid id, [FromBody] UserAuthRequest request)
         {
-            var userId = await _usersService.UpdateUser(id, request.Username, request.Email, request.Password);
-            return Ok(userId);
+            try
+            {
+                var userId = await _mediator.Send(new UpdateUserCommand(id, request.Username, request.Email, request.Password));
+                _logger.LogInformation($"Update user with id {id} and email {request.Email}");
+                return Ok(userId);
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to update user with id {id} and email {request.Email}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<Guid>> DeleteUser(Guid id)
         {
-            var userId = await _usersService.DeleteUser(id);
-            return Ok(userId);
+            try
+            {
+                var userId = await _mediator.Send(new DeleteUserCommand(id));
+                _logger.LogInformation($"Delete user with id {id}");
+                return Ok(userId);
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to delete user with id {id}: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+
         }
 
     }
