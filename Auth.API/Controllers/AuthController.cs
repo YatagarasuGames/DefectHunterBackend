@@ -1,6 +1,10 @@
 ﻿using Auth.API.Abstractions;
 using Auth.API.Contracts;
+using Auth.API.Services.Commands.CreateUser;
+using Auth.API.Services.Queries;
+using Auth.API.Services.Queries.GetUserByEmail;
 using Leaderboard.API.Contracts;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Database.Abstractions;
 using Shared.Models;
@@ -14,13 +18,13 @@ namespace Auth.API.Controllers
     {
 
         private IPasswordService _passwordService;
-        private IUsersService _usersService;
+        private IMediator _mediator;
         private ILogger _logger;
 
-        public AuthController(IPasswordService passwordService, IUsersService usersService, ILogger logger)
+        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger logger)
         {
             _passwordService = passwordService;
-            _usersService = usersService;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -28,39 +32,23 @@ namespace Auth.API.Controllers
         [Route("register")]
         public async Task<ActionResult<Guid>> Register([FromBody] UserAuthRequest request)
         {
-            var users = await _usersService.GetAllUsers();
-            if(users.FirstOrDefault(u => u.Email == request.Email) != null)
+
+            try
             {
-                return BadRequest("User with same email already registered");
-            }
-            else
-            {
-                var result = Shared.Models.User.Create(
+                var userId = await _mediator.Send(new CreateUserCommand(
                     Guid.NewGuid(),
                     request.Username,
                     request.Email,
                     _passwordService.HashPassword(request.Password)
-                    );
-                if (!result.IsSuccess)
-                {
-                    return BadRequest(result.Error);
-                }
+                    ));
+                _logger.LogInformation("User registered and event published: {UserId}", userId);
+                return Ok(userId);
+            }
 
-                var userId = await _usersService.CreateUser(result.Value);
-                HttpClient _httpClient = new HttpClient();
+            catch (Exception ex)
+            {
 
-                ScoreCreateRequest scoreRequest = new ScoreCreateRequest(userId, result.Value.Username, 0);
-                var response = await _httpClient.PostAsJsonAsync($"https://localhost:7160/api/leaderboard/create", scoreRequest);
-                if (!response.IsSuccessStatusCode)
-                {
-                    // Логируем ошибку, но не прерываем регистрацию
-                    Console.WriteLine($"Failed to create player score: {response.StatusCode}");
-                }
-                else
-                {
-                    Console.WriteLine($"Success to create player score: {response.StatusCode}");
-                }
-                    return Ok(result.Value.Id);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -68,21 +56,24 @@ namespace Auth.API.Controllers
         [Route("login")]
         public async Task<ActionResult> Login([FromBody] UserAuthRequest request)
         {
-            var users = await _usersService.GetAllUsers();
+            try
+            {
+                // Используем запрос для получения пользователя
+                var existingUser = await _mediator.Send(new GetUserByEmailQuery(request.Email));
 
-            var existingUser = users.FirstOrDefault(u => u.Email == request.Email);
-            if(existingUser == null)
-            {
-                return BadRequest("User with this email does not exist");
+                if (_passwordService.VerifyPassword(request.Password, existingUser.Password))
+                {
+                    return Ok("success");
+                }
+                else
+                {
+                    return BadRequest("Wrong credentials");
+                }
             }
-
-            if(_passwordService.VerifyPassword(request.Password, existingUser.Password))
+            catch (Exception ex)
             {
-                return Ok("success");
-            }
-            else
-            {
-                return BadRequest("Wrong credits");
+                _logger.LogError(ex, "Error during login for email {Email}", request.Email);
+                return StatusCode(500, "Internal server error");
             }
         }
 

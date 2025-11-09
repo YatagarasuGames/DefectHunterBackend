@@ -8,15 +8,15 @@ using Shared.Database.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/auth-api-.txt",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 7,
-        shared: true)
-    .CreateLogger();
+//Log.Logger = new LoggerConfiguration()
+//    .ReadFrom.Configuration(builder.Configuration)
+//    .Enrich.FromLogContext()
+//    .WriteTo.Console()
+//    .WriteTo.File("logs/auth-api-.txt",
+//        rollingInterval: RollingInterval.Day,
+//        retainedFileCountLimit: 7,
+//        shared: true)
+//    .CreateLogger();
 
 // Add services to the container.
 
@@ -31,8 +31,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(
         options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
     });
 
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
-builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IUsersRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 

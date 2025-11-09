@@ -8,5 +8,13 @@ namespace Auth.API.Services.Commands.UpdateUser
         public string Username { get; }
         public string Email { get; }
         public string Password { get; }
+
+        public UpdateUserCommand(Guid id, string username, string email, string password)
+        {
+            Id = id;
+            Username = username;
+            Email = email;
+            Password = password;
+        }
     }
 }

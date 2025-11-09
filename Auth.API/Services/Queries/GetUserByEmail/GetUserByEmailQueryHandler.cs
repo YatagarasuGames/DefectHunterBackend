@@ -4,18 +4,18 @@ using Shared.Models;
 
 namespace Auth.API.Services.Queries.GetUserByEmail
 {
-    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User?>
+    public class GetUserByEmailQueryHandler : IRequestHandler<GetUserByEmailQuery, User?>
     {
         private readonly IUsersRepository _usersRepository;
         private readonly ILogger _logger;
 
-        public GetUserByIdQueryHandler(IUsersRepository usersRepository, ILogger logger)
+        public GetUserByEmailQueryHandler(IUsersRepository usersRepository, ILogger logger)
         {
             _usersRepository = usersRepository;
             _logger = logger;
         }
 
-        public async Task<User?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<User?> Handle(GetUserByEmailQuery request, CancellationToken cancellationToken)
         {
             _logger.LogDebug("Getting user by email: {Email}", request.Email);
 

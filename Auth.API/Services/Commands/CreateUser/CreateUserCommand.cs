@@ -9,5 +9,13 @@ namespace Auth.API.Services.Commands.CreateUser
         public string Username { get; }
         public string Email { get; }
         public string Password { get; }
+
+        public CreateUserCommand(Guid id, string username, string email, string password)
+        {
+            Id = id;
+            Username = username;
+            Email = email;
+            Password = password;
+        }
     }
 }
