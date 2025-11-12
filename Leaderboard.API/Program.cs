@@ -1,6 +1,7 @@
 using Leaderboard.API.Abstractions;
 using Leaderboard.API.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Shared.Database;
 using Shared.Database.Abstractions;
 using Shared.Database.Repositories;
@@ -14,7 +15,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/auth-api-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        shared: true)
+    .CreateLogger();
+
 builder.Services.AddScoped<IPlayerScoreRepository, PlayerScoreRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
@@ -22,6 +32,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
     });
+
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
 builder.Services.AddCors(options =>
 {
