@@ -62,7 +62,6 @@ namespace Leaderboard.API.Services
 
             consumer.ReceivedAsync += async (sender, eventArgs) =>
             {
-                // Создаем scope для каждого сообщения
                 using var scope = _serviceScopeFactory.CreateScope();
                 var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 

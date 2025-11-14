@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leaderboard.API", "..\Leade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Events", "..\Shared.Events\Shared.Events.csproj", "{0FA18F45-F376-4581-9D4C-1E70E25A4F11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Gateway", "..\API.Gateway\API.Gateway.csproj", "{BCE65961-240D-4CAE-8A5F-F493285BD1E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{0FA18F45-F376-4581-9D4C-1E70E25A4F11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FA18F45-F376-4581-9D4C-1E70E25A4F11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FA18F45-F376-4581-9D4C-1E70E25A4F11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE65961-240D-4CAE-8A5F-F493285BD1E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE65961-240D-4CAE-8A5F-F493285BD1E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE65961-240D-4CAE-8A5F-F493285BD1E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE65961-240D-4CAE-8A5F-F493285BD1E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
