@@ -39,6 +39,7 @@ builder.Services.AddMediatR(config =>
 
 builder.Services.AddScoped<IUsersRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
 
 builder.Services.AddCors(options =>
 {

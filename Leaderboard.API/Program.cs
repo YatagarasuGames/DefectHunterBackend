@@ -26,6 +26,11 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Services.AddScoped<IPlayerScoreRepository, PlayerScoreRepository>();
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options =>
@@ -33,10 +38,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(
         options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
     });
 
-builder.Services.AddMediatR(config =>
-{
-    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
-});
+builder.Services.AddHostedService<RabbitMqListener>();
+
+
+
+
 
 builder.Services.AddCors(options =>
 {

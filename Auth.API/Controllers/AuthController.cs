@@ -14,13 +14,15 @@ namespace Auth.API.Controllers
 
         private IPasswordService _passwordService;
         private IMediator _mediator;
+        private readonly IRabbitMQService _rabbitmqService;
         private ILogger<AuthController> _logger;
 
-        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger<AuthController> logger)
+        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger<AuthController> logger, IRabbitMQService rabbitmqService)
         {
             _passwordService = passwordService;
             _mediator = mediator;
             _logger = logger;
+            _rabbitmqService = rabbitmqService;
         }
 
         [HttpPost]
@@ -36,6 +38,7 @@ namespace Auth.API.Controllers
                     request.Email,
                     _passwordService.HashPassword(request.Password)
                     ));
+                _rabbitmqService.PublishUserRegisteredEvent(new Shared.Events.UserRegisteredEvent(userId, request.Username, request.Email));
                 _logger.LogInformation("User registered and event published: {UserId}", userId);
                 return Ok(userId);
             }
