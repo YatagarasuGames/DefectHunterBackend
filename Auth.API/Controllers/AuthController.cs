@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.API.Controllers
 {
+    public record ErrorResponse(string message);
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
@@ -46,7 +47,7 @@ namespace Auth.API.Controllers
             catch (Exception ex)
             {
 
-                return BadRequest(ex.Message);
+                return BadRequest(new ErrorResponse(ex.Message));
             }
         }
 
@@ -64,13 +65,13 @@ namespace Auth.API.Controllers
                 }
                 else
                 {
-                    return BadRequest("Wrong credentials");
+                    return BadRequest(new ErrorResponse("Wrong credentials"));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during login for email {Email}", request.Email);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new ErrorResponse("Internal server error"));
             }
         }
 
