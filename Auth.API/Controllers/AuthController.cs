@@ -8,6 +8,23 @@ using Microsoft.AspNetCore.Mvc;
 namespace Auth.API.Controllers
 {
     public record ErrorResponse(string message);
+    public record RegisterResponse(Guid id);
+    public class LoginResponse
+    {
+        public Guid Id { get; }
+        public string? AccessToken { get; }
+        public string? RefreshToken { get; }
+        public int ExpiresIn { get; }
+
+        public LoginResponse(Guid id, string accessToken, string refreshToken, int expiresIn)
+        {
+            Id = id;
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            ExpiresIn = expiresIn;
+        }
+    }
+    
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
@@ -41,7 +58,7 @@ namespace Auth.API.Controllers
                     ));
                 _rabbitmqService.PublishUserRegisteredEvent(new Shared.Events.UserRegisteredEvent(userId, request.Username, request.Email));
                 _logger.LogInformation("User registered and event published: {UserId}", userId);
-                return Ok(userId);
+                return Ok(new RegisterResponse(userId));
             }
 
             catch (Exception ex)
@@ -53,7 +70,7 @@ namespace Auth.API.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult> Login([FromBody] UserAuthRequest request)
+        public async Task<ActionResult<Guid>> Login([FromBody] UserAuthRequest request)
         {
             try
             {
@@ -61,7 +78,7 @@ namespace Auth.API.Controllers
 
                 if (_passwordService.VerifyPassword(request.Password, existingUser.Password))
                 {
-                    return Ok("success");
+                    return Ok("gfgf");//new LoginResponse(existingUser.Id));
                 }
                 else
                 {

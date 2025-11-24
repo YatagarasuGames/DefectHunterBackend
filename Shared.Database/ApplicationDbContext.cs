@@ -9,5 +9,6 @@ namespace Shared.Database
 
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<PlayerScoreEntity> PlayerScores { get; set; }
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     }
 }

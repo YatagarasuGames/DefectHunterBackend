@@ -12,7 +12,7 @@ using Shared.Database;
 namespace Shared.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251104130010_Initial")]
+    [Migration("20251123184259_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -41,6 +41,27 @@ namespace Shared.Database.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("PlayerScores");
+                });
+
+            modelBuilder.Entity("Shared.Database.Entities.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpireTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Shared.Database.Entities.UserEntity", b =>

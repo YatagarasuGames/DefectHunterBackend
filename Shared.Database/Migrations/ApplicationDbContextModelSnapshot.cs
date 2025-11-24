@@ -40,6 +40,27 @@ namespace Shared.Database.Migrations
                     b.ToTable("PlayerScores");
                 });
 
+            modelBuilder.Entity("Shared.Database.Entities.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpireTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Shared.Database.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")

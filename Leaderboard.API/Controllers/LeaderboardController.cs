@@ -7,13 +7,16 @@ using Leaderboard.API.Services.Commands.SetPlayerScore;
 using Leaderboard.API.Services.Commands.UpdateScore;
 using Leaderboard.API.Services.Queries.GetAllPlayerScores;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models;
+using System.Security.Claims;
 
 namespace Leaderboard.API.Controllers
 {
     [ApiController]
     [Route("api/leaderboard")]
+    [Authorize]
     public class LeaderboardController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -99,6 +102,17 @@ namespace Leaderboard.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private Guid GetUserIdFromToken()
+        {
+            var userIdClaim = User.FindFirst("nameid") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return userId;
+            }
+
+            throw new UnauthorizedAccessException("Invalid user ID in token");
         }
 
         //[HttpPut("update-player-score")]
