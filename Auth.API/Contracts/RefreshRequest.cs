@@ -2,6 +2,6 @@
 {
     public record RefreshRequest
     (
-        string? Token
+        string? token
     );
 }

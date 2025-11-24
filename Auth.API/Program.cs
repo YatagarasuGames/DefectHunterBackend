@@ -40,9 +40,11 @@ builder.Services.AddMediatR(config =>
     config.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
 
-builder.Services.AddScoped<IUsersRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
+builder.Services.AddScoped<IJwtAuthenticationService, JwtAuthenticationService>();
+builder.Services.AddScoped<IUsersRepository, UserRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddCors(options =>
 {

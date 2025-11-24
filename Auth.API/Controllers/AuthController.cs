@@ -4,26 +4,10 @@ using Auth.API.Services.Commands.CreateUser;
 using Auth.API.Services.Queries.GetUserByEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Models;
 
 namespace Auth.API.Controllers
 {
-    public record ErrorResponse(string message);
-    public record RegisterResponse(Guid id);
-    public class LoginResponse
-    {
-        public Guid Id { get; }
-        public string? AccessToken { get; }
-        public string? RefreshToken { get; }
-        public int ExpiresIn { get; }
-
-        public LoginResponse(Guid id, string accessToken, string refreshToken, int expiresIn)
-        {
-            Id = id;
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
-            ExpiresIn = expiresIn;
-        }
-    }
     
     [ApiController]
     [Route("api/auth")]
@@ -33,32 +17,42 @@ namespace Auth.API.Controllers
         private IPasswordService _passwordService;
         private IMediator _mediator;
         private readonly IRabbitMQService _rabbitmqService;
+        private readonly IJwtAuthenticationService _jwtAuthenticationService;
         private ILogger<AuthController> _logger;
 
-        public AuthController(IPasswordService passwordService, IMediator mediator, ILogger<AuthController> logger, IRabbitMQService rabbitmqService)
+        public AuthController(IPasswordService passwordService,
+            IMediator mediator,
+            ILogger<AuthController> logger,
+            IRabbitMQService rabbitmqService,
+            IJwtAuthenticationService jwtAuthenticationService
+            )
         {
             _passwordService = passwordService;
             _mediator = mediator;
             _logger = logger;
             _rabbitmqService = rabbitmqService;
+            _jwtAuthenticationService = jwtAuthenticationService;
         }
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<Guid>> Register([FromBody] UserAuthRequest request)
+        public async Task<ActionResult<Guid>> Register([FromBody] RegisterRequest request)
         {
 
             try
             {
                 var userId = await _mediator.Send(new CreateUserCommand(
                     Guid.NewGuid(),
-                    request.Username,
-                    request.Email,
-                    _passwordService.HashPassword(request.Password)
+                    request.username,
+                    request.email,
+                    _passwordService.HashPassword(request.password)
                     ));
-                _rabbitmqService.PublishUserRegisteredEvent(new Shared.Events.UserRegisteredEvent(userId, request.Username, request.Email));
+
+                var response = await _jwtAuthenticationService.GenerateJwtToken(userId);
+                _rabbitmqService.PublishUserRegisteredEvent(new Shared.Events.UserRegisteredEvent(userId, request.username, request.email));
                 _logger.LogInformation("User registered and event published: {UserId}", userId);
-                return Ok(new RegisterResponse(userId));
+
+                return Ok(response);
             }
 
             catch (Exception ex)
@@ -70,15 +64,18 @@ namespace Auth.API.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<Guid>> Login([FromBody] UserAuthRequest request)
+        public async Task<ActionResult<Guid>> Login([FromBody] LoginRequest request)
         {
             try
             {
-                var existingUser = await _mediator.Send(new GetUserByEmailQuery(request.Email));
+                var existingUser = await _mediator.Send(new GetUserByEmailQuery(request.email));
 
-                if (_passwordService.VerifyPassword(request.Password, existingUser.Password))
+                if (existingUser == null) return BadRequest(new ErrorResponse("User with given email not found"));
+
+                if (_passwordService.VerifyPassword(request.password, existingUser.Password))
                 {
-                    return Ok("gfgf");//new LoginResponse(existingUser.Id));
+                    var response = await _jwtAuthenticationService.GenerateJwtToken(existingUser.Id);
+                    return Ok(response);
                 }
                 else
                 {
@@ -87,8 +84,31 @@ namespace Auth.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login for email {Email}", request.Email);
+                _logger.LogError(ex, "Error during login for email {Email}", request.email);
                 return StatusCode(500, new ErrorResponse("Internal server error"));
+            }
+        }
+
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.token))
+                    return BadRequest("Refresh token is required");
+
+                var loginResponse = await _jwtAuthenticationService.ValidateRefreshToken(request.token);
+
+                if (loginResponse == null)
+                    return Unauthorized("Invalid or expired refresh token");
+
+                return Ok(loginResponse);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during token refresh");
+                return StatusCode(500, "Internal server error");
             }
         }
 
