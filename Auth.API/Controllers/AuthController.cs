@@ -102,7 +102,7 @@ namespace Auth.API.Controllers
 
                 if (loginResponse == null)
                     return Unauthorized("Invalid or expired refresh token");
-
+                Console.WriteLine("Refresh token request");
                 return Ok(loginResponse);
             }
             catch (Exception ex)

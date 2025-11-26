@@ -26,6 +26,7 @@ namespace Auth.API.Services
 
         public async Task<LoginResponse> GenerateJwtToken(Guid userId)
         {
+            var user = await _usersRepository.GetUserByIdAsync(userId);
             var issuer = _configuration["JwtConfig:Issuer"];
             var audience = _configuration["JwtConfig:Audience"];
             var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:Key"]!);
@@ -37,7 +38,8 @@ namespace Auth.API.Services
                 issuer,
                 audience,
                 [
-                    new Claim(JwtRegisteredClaimNames.NameId, userId.ToString())
+                    new Claim(JwtRegisteredClaimNames.NameId, userId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Nickname, user != null ? user.Username : "Unnamed")
                 ],
                 expires: tokenExpiryTimestamp,
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key),

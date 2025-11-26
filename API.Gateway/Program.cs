@@ -20,9 +20,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+        "http://localhost:7000",
+        "http://localhost",
+        "http://127.0.0.1",
+        "http://192.168.56.1", // ваш IP
+        "http://192.168.0.107" // ваш IP
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 

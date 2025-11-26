@@ -6,7 +6,7 @@ using Shared.Models;
 
 namespace Shared.Database.Repositories
 {
-    internal class RefreshTokenRepository : IRefreshTokenRepository
+    public class RefreshTokenRepository : IRefreshTokenRepository
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<RefreshTokenRepository> _logger;
