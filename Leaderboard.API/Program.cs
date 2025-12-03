@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Leaderboard.API.Abstractions;
 using Leaderboard.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,18 +13,20 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+Env.Load();
+builder.Configuration.AddEnvironmentVariables();
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("logs/auth-api-.txt",
+    .WriteTo.File("logs/leaderboard-api-.txt",
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 7,
         shared: true)

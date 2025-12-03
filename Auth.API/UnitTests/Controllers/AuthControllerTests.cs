@@ -43,17 +43,14 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task Register_WithValidRequest_ShouldReturnOk()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var request = new RegisterRequest("testuser", "test@email.com", "password123");
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(userId);
 
-            // Act
             var result = await _authController.Register(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.NotNull(okResult.Value);
             _mediatorMock.Verify(x => x.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -63,16 +60,13 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task Register_WithExistingEmail_ShouldReturnBadRequest()
         {
-            // Arrange
             var request = new RegisterRequest("testuser", "existing@email.com", "password123");
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("User with email existing@email.com already exists"));
 
-            // Act
             var result = await _authController.Register(request);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
             Assert.Contains("already exists", errorResponse.message);
@@ -81,7 +75,6 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task Login_WithValidCredentials_ShouldReturnOk()
         {
-            // Arrange
             var request = new LoginRequest("test@email.com", "password123");
             var user = User.Create(Guid.NewGuid(), "testuser", "test@email.com", "hashed_password123").Value;
 
@@ -90,10 +83,8 @@ namespace Auth.API.UnitTests.Controllers
             _passwordServiceMock.Setup(x => x.VerifyPassword(request.password, user.Password))
                 .Returns(true);
 
-            // Act
             var result = await _authController.Login(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.NotNull(okResult.Value);
         }
@@ -101,16 +92,13 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task Login_WithInvalidEmail_ShouldReturnBadRequest()
         {
-            // Arrange
             var request = new LoginRequest("nonexistent@email.com", "password123");
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetUserByEmailQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((User)null);
 
-            // Act
             var result = await _authController.Login(request);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
             Assert.Equal("User with given email not found", errorResponse.message);
@@ -119,7 +107,6 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task Login_WithWrongPassword_ShouldReturnBadRequest()
         {
-            // Arrange
             var request = new LoginRequest("test@email.com", "wrongpassword");
             var user = User.Create(Guid.NewGuid(), "testuser", "test@email.com", "hashed_password123").Value;
 
@@ -128,10 +115,8 @@ namespace Auth.API.UnitTests.Controllers
             _passwordServiceMock.Setup(x => x.VerifyPassword(request.password, user.Password))
                 .Returns(false);
 
-            // Act
             var result = await _authController.Login(request);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
             Assert.Equal("Wrong credentials", errorResponse.message);
@@ -140,13 +125,10 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task RefreshToken_WithValidToken_ShouldReturnOk()
         {
-            // Arrange
             var request = new RefreshRequest("valid_refresh_token");
 
-            // Act
             var result = await _authController.RefreshToken(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.NotNull(okResult.Value);
         }
@@ -154,13 +136,10 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task RefreshToken_WithEmptyToken_ShouldReturnBadRequest()
         {
-            // Arrange
             var request = new RefreshRequest("");
 
-            // Act
             var result = await _authController.RefreshToken(request);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Refresh token is required", badRequestResult.Value);
         }
@@ -168,15 +147,12 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public async Task RefreshToken_WithInvalidToken_ShouldReturnUnauthorized()
         {
-            // Arrange
             var request = new RefreshRequest("invalid_token");
             _jwtAuthenticationServiceMock.Setup(x => x.ValidateRefreshToken(It.IsAny<string>()))
                 .ReturnsAsync((LoginResponse)null);
 
-            // Act
             var result = await _authController.RefreshToken(request);
 
-            // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
             Assert.Equal("Invalid or expired refresh token", unauthorizedResult.Value);
         }
@@ -184,10 +160,8 @@ namespace Auth.API.UnitTests.Controllers
         [Fact]
         public void TestConnection_ShouldReturnOk()
         {
-            // Act
             var result = _authController.TestConnection();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal("Server is running", okResult.Value);
         }

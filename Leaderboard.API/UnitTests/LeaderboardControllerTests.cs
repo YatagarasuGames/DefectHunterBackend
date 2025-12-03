@@ -30,7 +30,6 @@ namespace Leaderboard.API.UnitTests
                 _loggerMock.Object
             );
 
-            // Устанавливаем контекст пользователя с валидными claims
             var user = LeaderboardMockServices.CreateClaimsPrincipal();
             _controller.ControllerContext = new ControllerContext
             {
@@ -41,7 +40,6 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task GetLeaderboard_ShouldReturnOkWithScores()
         {
-            // Arrange
             var expectedScores = new List<PlayerScore>
             {
                 PlayerScore.Create(Guid.NewGuid(), "user1", 100).Value,
@@ -52,10 +50,8 @@ namespace Leaderboard.API.UnitTests
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetAllPlayerScoresQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedScores);
 
-            // Act
             var result = await _controller.GetLeaderboard();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedScores = Assert.IsType<List<PlayerScore>>(okResult.Value);
             Assert.Equal(expectedScores.Count, returnedScores.Count);
@@ -66,14 +62,11 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task GetLeaderboard_WhenExceptionThrown_ShouldReturnBadRequest()
         {
-            // Arrange
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetAllPlayerScoresQuery>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act
             var result = await _controller.GetLeaderboard();
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Database error", badRequestResult.Value);
         }
@@ -81,17 +74,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task CreatePlayerScore_WithValidRequest_ShouldReturnOk()
         {
-            // Arrange
             var request = new ScoreCreateRequest(Guid.NewGuid(), "testuser", 100);
             var expectedId = Guid.NewGuid();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<CreatePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _controller.CreatePlayerScore(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(expectedId, okResult.Value);
 
@@ -106,16 +96,13 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task CreatePlayerScore_WhenExceptionThrown_ShouldReturnBadRequest()
         {
-            // Arrange
             var request = new ScoreCreateRequest(Guid.NewGuid(), "testuser", 100);
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<CreatePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("User already exists"));
 
-            // Act
             var result = await _controller.CreatePlayerScore(request);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("User already exists", badRequestResult.Value);
         }
@@ -123,17 +110,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task DeletePlayerScore_WithValidId_ShouldReturnOk()
         {
-            // Arrange
             var requestId = Guid.NewGuid();
             var expectedId = Guid.NewGuid();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<DeletePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _controller.DeletePlayerScore(requestId);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(expectedId, okResult.Value);
 
@@ -145,16 +129,13 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task DeletePlayerScore_WhenExceptionThrown_ShouldReturnBadRequest()
         {
-            // Arrange
             var requestId = Guid.NewGuid();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<DeletePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Score not found"));
 
-            // Act
             var result = await _controller.DeletePlayerScore(requestId);
 
-            // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Score not found", badRequestResult.Value);
         }
@@ -162,17 +143,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task AddToPlayerScore_WithValidRequest_ShouldReturnOk()
         {
-            // Arrange
             var request = new ScoreUpdateRequest(Guid.NewGuid(), 50);
             var expectedId = Guid.NewGuid();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<AddPlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _controller.AddToPlayerScore(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(expectedId, okResult.Value);
 
@@ -186,17 +164,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task ReplacePlayerScore_WithValidRequest_ShouldReturnOk()
         {
-            // Arrange
             var request = new ScoreUpdateRequest(Guid.NewGuid(), 300);
             var expectedId = Guid.NewGuid();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<SetPlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _controller.ReplacePlayerScore(request);
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(expectedId, okResult.Value);
 
@@ -207,23 +182,5 @@ namespace Leaderboard.API.UnitTests
                 It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Fact]
-        public void GetUserIdFromToken_WithValidNameIdClaim_ShouldReturnUserId()
-        {
-            // Arrange
-            var expectedUserId = Guid.NewGuid();
-            var user = LeaderboardMockServices.CreateClaimsPrincipal(expectedUserId);
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-
-            // Act
-            var method = typeof(LeaderboardController).GetMethod("GetUserIdFromToken", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var result = (Guid)method.Invoke(_controller, null);
-
-            // Assert
-            Assert.Equal(expectedUserId, result);
-        }
     }
 }

@@ -57,7 +57,9 @@ namespace Leaderboard.API.Controllers
             }
         }
 
+
         [HttpDelete("delete-player-score/{requestId}")]
+        [SwaggerOnly]
         public async Task<ActionResult<Guid>> DeletePlayerScore([FromRoute] Guid requestId)
         {
             try
@@ -88,6 +90,7 @@ namespace Leaderboard.API.Controllers
         }
 
         [HttpPut("replace-player-score")]
+        [SwaggerOnly]
         public async Task<ActionResult<Guid>> ReplacePlayerScore([FromBody] ScoreUpdateRequest request)
         {
             try

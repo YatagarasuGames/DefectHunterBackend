@@ -12,7 +12,6 @@ namespace Auth.API.UnitTests
         [Fact]
         public async Task Handle_WithNewUser_ShouldReturnUserId()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var command = new CreateUserCommand(userId, "testuser", "test@email.com", "hashed_password");
 
@@ -26,17 +25,14 @@ namespace Auth.API.UnitTests
 
             var handler = new CreateUserCommandHandler(usersRepositoryMock.Object, loggerMock.Object);
 
-            // Act
             var result = await handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.Equal(userId, result);
         }
 
         [Fact]
         public async Task Handle_WithExistingEmail_ShouldThrowException()
         {
-            // Arrange
             var command = new CreateUserCommand(Guid.NewGuid(), "testuser", "existing@email.com", "hashed_password");
             var existingUser = User.Create(Guid.NewGuid(), "existinguser", "existing@email.com", "hashed_password").Value;
 
@@ -48,7 +44,6 @@ namespace Auth.API.UnitTests
 
             var handler = new CreateUserCommandHandler(usersRepositoryMock.Object, loggerMock.Object);
 
-            // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 handler.Handle(command, CancellationToken.None));
         }
@@ -59,7 +54,6 @@ namespace Auth.API.UnitTests
         [Fact]
         public async Task Handle_WithExistingUser_ShouldReturnUserId()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var command = new DeleteUserCommand(userId);
             var user = User.Create(userId, "testuser", "test@email.com", "hashed_password").Value;
@@ -74,17 +68,14 @@ namespace Auth.API.UnitTests
 
             var handler = new DeleteUserCommandHandler(usersRepositoryMock.Object, loggerMock.Object);
 
-            // Act
             var result = await handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.Equal(userId, result);
         }
 
         [Fact]
         public async Task Handle_WithNonExistentUser_ShouldThrowException()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var command = new DeleteUserCommand(userId);
 
@@ -96,7 +87,6 @@ namespace Auth.API.UnitTests
 
             var handler = new DeleteUserCommandHandler(usersRepositoryMock.Object, loggerMock.Object);
 
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 handler.Handle(command, CancellationToken.None));
         }

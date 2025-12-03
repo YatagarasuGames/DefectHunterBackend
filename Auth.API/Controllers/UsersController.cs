@@ -6,15 +6,14 @@ using Auth.API.Services.Commands.UpdateUser;
 using Auth.API.Services.Queries.GetAllUsers;
 using Auth.API.Services.Queries.GetUserById;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Shared.Models;
 
 namespace Auth.API.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize]
+    [SwaggerOnly]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -54,7 +53,6 @@ namespace Auth.API.Controllers
         {
             try
             {
-
                 var user = await _mediator.Send(new GetUserByIdQuery(userId));
                 if (user == null)
                 {
@@ -63,6 +61,7 @@ namespace Auth.API.Controllers
                 }
 
                 var response = new UserResponse(user.Id, user.Username, user.Email);
+                _logger.LogInformation("Retrieved user with ID {UserId}", userId);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -92,17 +91,20 @@ namespace Auth.API.Controllers
                     hashedPassword
                 ));
 
-                _logger.LogInformation("User created with ID: {UserId}, Email: {Email}", createdUserId, request.Email);
+                _logger.LogInformation("Сreated user with ID: {UserId}, Email: {Email}",
+                    createdUserId, request.Email);
                 return Ok(createdUserId);
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
             {
-                _logger.LogWarning("Attempt to create user with existing email: {Email}", request.Email);
+                _logger.LogWarning("Attempt to create user with existing email: {Email}",
+                    request.Email);
                 return Conflict(new ErrorResponse("User with this email already exists"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create user with email {Email}", request.Email);
+                _logger.LogError(ex, "Failed to create user with email {Email}",
+                    request.Email);
                 return BadRequest(new ErrorResponse("Failed to create user"));
             }
         }
@@ -112,11 +114,6 @@ namespace Auth.API.Controllers
         {
             try
             {
-                if (!CanAccessUser(id))
-                {
-                    return Forbid("You can only update your own user data");
-                }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(new ErrorResponse("Invalid request data"));
@@ -135,7 +132,7 @@ namespace Auth.API.Controllers
                     hashedPassword
                 ));
 
-                _logger.LogInformation("User updated with ID: {UserId}", userId);
+                _logger.LogInformation("Updated user with ID: {UserId}", userId);
                 return Ok(userId);
             }
             catch (ArgumentException ex)
@@ -150,7 +147,6 @@ namespace Auth.API.Controllers
             }
         }
 
-
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<Guid>> DeleteUser(Guid id)
         {
@@ -158,7 +154,7 @@ namespace Auth.API.Controllers
             {
                 var userId = await _mediator.Send(new DeleteUserCommand(id));
 
-                _logger.LogInformation("User deleted with ID: {UserId}", userId);
+                _logger.LogInformation("Deleted user with ID: {UserId}", userId);
                 return Ok(userId);
             }
             catch (ArgumentException ex)
@@ -171,25 +167,6 @@ namespace Auth.API.Controllers
                 _logger.LogError(ex, "Failed to delete user with ID {UserId}", id);
                 return BadRequest(new ErrorResponse("Failed to delete user"));
             }
-        }
-
-        private bool CanAccessUser(Guid targetUserId)
-        {
-            var currentUserId = GetCurrentUserId();
-            var isAdmin = User.IsInRole("Admin");
-
-            return currentUserId == targetUserId || isAdmin;
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst("nameid") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
-            {
-                return userId;
-            }
-
-            throw new UnauthorizedAccessException("Invalid user ID in token");
         }
     }
 }

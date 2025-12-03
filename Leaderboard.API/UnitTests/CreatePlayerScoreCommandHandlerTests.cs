@@ -22,17 +22,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task Handle_WithValidCommand_ShouldReturnPlayerScoreId()
         {
-            // Arrange
             var command = new CreatePlayerScoreCommand(Guid.NewGuid(), "testuser", 100);
             var expectedId = Guid.NewGuid();
 
             _repositoryMock.Setup(x => x.Create(It.IsAny<PlayerScore>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.Equal(expectedId, result);
             _repositoryMock.Verify(x => x.Create(It.IsAny<PlayerScore>()), Times.Once);
         }
@@ -43,17 +40,14 @@ namespace Leaderboard.API.UnitTests
         [InlineData("test-user", uint.MaxValue)]
         public async Task Handle_WithDifferentValidData_ShouldWork(string username, uint score)
         {
-            // Arrange
             var command = new CreatePlayerScoreCommand(Guid.NewGuid(), username, score);
             var expectedId = Guid.NewGuid();
 
             _repositoryMock.Setup(x => x.Create(It.IsAny<PlayerScore>()))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.Equal(expectedId, result);
         }
     }

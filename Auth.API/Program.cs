@@ -1,6 +1,6 @@
 using Auth.API.Abstractions;
-using Auth.API.Controllers;
 using Auth.API.Services;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +12,9 @@ using Shared.Database.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
+builder.Configuration.AddEnvironmentVariables();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -26,7 +29,6 @@ Log.Logger = new LoggerConfiguration()
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -55,14 +57,13 @@ builder.Services.AddCors(options =>
                 "http://localhost:7000",
                 "http://localhost",
                 "http://127.0.0.1",
-                "http://192.168.56.1", // ваш IP
-                "http://192.168.0.107" // ваш IP
+                "http://192.168.56.1",
+                "http://192.168.0.107"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
-//builder.Host.UseSerilog();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -85,6 +86,7 @@ builder.Services.AddAuthentication(options =>
     };
 
 });
+
 
 builder.Services.AddAuthorization();
 
@@ -116,9 +118,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

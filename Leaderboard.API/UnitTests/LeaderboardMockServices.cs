@@ -16,7 +16,6 @@ namespace Leaderboard.API.UnitTests
         {
             var mock = new Mock<IMediator>();
 
-            // Настройка для GetAllPlayerScoresQuery
             mock.Setup(x => x.Send(It.IsAny<GetAllPlayerScoresQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PlayerScore>
                 {
@@ -24,19 +23,15 @@ namespace Leaderboard.API.UnitTests
                     PlayerScore.Create(Guid.NewGuid(), "user2", 200).Value
                 });
 
-            // Настройка для CreatePlayerScoreCommand
             mock.Setup(x => x.Send(It.IsAny<CreatePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Guid.NewGuid());
 
-            // Настройка для DeletePlayerScoreCommand
             mock.Setup(x => x.Send(It.IsAny<DeletePlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Guid.NewGuid());
 
-            // Настройка для AddPlayerScoreCommand
             mock.Setup(x => x.Send(It.IsAny<AddPlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Guid.NewGuid());
 
-            // Настройка для SetPlayerScoreCommand
             mock.Setup(x => x.Send(It.IsAny<SetPlayerScoreCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Guid.NewGuid());
 

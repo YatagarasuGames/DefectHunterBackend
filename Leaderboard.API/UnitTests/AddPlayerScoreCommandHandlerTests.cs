@@ -22,7 +22,6 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task Handle_WithExistingPlayer_ShouldReturnPlayerId()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var scoreToAdd = 50u;
             var command = new AddPlayerScoreCommand(userId, scoreToAdd);
@@ -34,10 +33,8 @@ namespace Leaderboard.API.UnitTests
             _repositoryMock.Setup(x => x.AddScore(userId, scoreToAdd))
                 .ReturnsAsync(expectedId);
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.Equal(expectedId, result);
             _repositoryMock.Verify(x => x.GetScoreByUserId(userId), Times.Once);
             _repositoryMock.Verify(x => x.AddScore(userId, scoreToAdd), Times.Once);
@@ -46,14 +43,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task Handle_WithNonExistentPlayer_ShouldThrowException()
         {
-            // Arrange
+
             var nonExistentUserId = Guid.NewGuid();
             var command = new AddPlayerScoreCommand(nonExistentUserId, 50);
 
             _repositoryMock.Setup(x => x.GetScoreByUserId(nonExistentUserId))
                 .ReturnsAsync((PlayerScore)null);
 
-            // Act & Assert
+
             var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
@@ -63,14 +60,14 @@ namespace Leaderboard.API.UnitTests
         [Fact]
         public async Task Handle_WithNonExistentPlayer_ShouldLogError()
         {
-            // Arrange
+
             var nonExistentUserId = Guid.NewGuid();
             var command = new AddPlayerScoreCommand(nonExistentUserId, 50);
 
             _repositoryMock.Setup(x => x.GetScoreByUserId(nonExistentUserId))
                 .ReturnsAsync((PlayerScore)null);
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
@@ -90,7 +87,6 @@ namespace Leaderboard.API.UnitTests
         [InlineData(999u)]
         public async Task Handle_WithDifferentScores_ShouldWork(uint scoreToAdd)
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var command = new AddPlayerScoreCommand(userId, scoreToAdd);
             var existingPlayer = PlayerScore.Create(userId, "testuser", 100).Value;
@@ -100,10 +96,10 @@ namespace Leaderboard.API.UnitTests
             _repositoryMock.Setup(x => x.AddScore(userId, scoreToAdd))
                 .ReturnsAsync(userId);
 
-            // Act
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
+
             Assert.Equal(userId, result);
         }
     }
